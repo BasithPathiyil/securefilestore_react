@@ -10,26 +10,27 @@ const ListFiles = ({ setCounter, counter }) => {
   const [open, setOpen] = useState(false);
   const [fileId, setFileId] = useState("");
   const [fileName, setFileName] = useState("");
-  const totalItems = 100;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setrowsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(10);
 
   const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-    // Fetch data for the new page
+    setPage(newPage);
   };
 
   const handlerowsPerPageChange = (newrowsPerPage) => {
     setrowsPerPage(newrowsPerPage);
-    // Fetch data for the new items per page
   };
 
   const [files, setFiles] = useState([]);
   const fetchAllFiles = async () => {
     try {
-      const { data } = await api.get("/file_upload/get_all_files_by_userid");
+      const { data } = await api.get("/file_upload/get_all_files_by_userid", {
+        params: { page, rowsPerPage },
+      });
       console.log("data", data);
       setFiles(data?.arrResult);
+      setTotalItems(data?.arrCount);
     } catch (error) {
       toast.error(
         error?.response?.data?.error?.message
@@ -40,7 +41,7 @@ const ListFiles = ({ setCounter, counter }) => {
   };
   useEffect(() => {
     fetchAllFiles();
-  }, [counter]);
+  }, [counter, page, rowsPerPage]);
   const handleDownload = (fileId, fileName) => {
     // Add your download logic here
     console.log("Downloading:", fileId);
@@ -80,12 +81,12 @@ const ListFiles = ({ setCounter, counter }) => {
         fileId={fileId}
         fileName={fileName}
       />
-      {/* <Pagination
+      <Pagination
         totalItems={totalItems}
         rowsPerPage={rowsPerPage}
         onPageChange={handlePageChange}
         onrowsPerPageChange={handlerowsPerPageChange}
-      /> */}
+      />
     </div>
   );
 };
